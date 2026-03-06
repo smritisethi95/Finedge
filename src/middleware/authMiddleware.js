@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
+const userService = require('../services/userService');
+const { UnauthorizedError, TokenError } = require('../errors/authError');
 
 const validateJWT = (req, res, next) => {
     try {
@@ -8,16 +10,17 @@ const validateJWT = (req, res, next) => {
         const authToken = authHeader?.split(' ')[1];
 
         if(!authToken) {
-            throw new Error();
+            throw new UnauthorizedError();
         }
 
         const decodedToken = jwt.verify(authToken, JWT_SECRET);
 
         if(!decodedToken) {
-            throw new Error();
+            throw new TokenError();
         }
 
-        // TODO: Find and attach User to request
+        // const user = userService.getUserById(decodedToken.id);
+        // req.user = user;
 
         next();
 
