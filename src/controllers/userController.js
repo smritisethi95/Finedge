@@ -5,11 +5,11 @@ class UserController {
     async register(req, res, next) {
         try {
             const userData = req.body;
-            const user = await userService.registerUser(userData);
+            const { user, token } = await userService.registerUser(userData);
             res.status(201).json({
                 success: true,
                 message: 'User registered succesfully',
-                data: user
+                data: { user, token }
             })
         } catch (error) {
             next(error);
@@ -19,11 +19,11 @@ class UserController {
     async login(req, res, next) {
         try {
             const {email, password} = req.body;
-            const user = await userService.loginUser(email, password);
+            const { user, token } = await userService.loginUser(email, password);
             res.status(200).json({
                 success: true,
                 message: 'user logged in successfully',
-                data: user
+                data: { user, token }
             })
         } catch (error) {
             next(error);
