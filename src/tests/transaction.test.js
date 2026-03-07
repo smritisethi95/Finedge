@@ -10,7 +10,7 @@ let transactionId;
 
 beforeAll(async () => {
     // Connect to test database
-    const mongoUri = process.env.MONGODB_URI_TEST || 'mongodb+srv://finedge_admin:Test123@cluster0.dqyjf1r.mongodb.net/finedge_test?appName=Cluster0';
+    const mongoUri = process.env.MONGODB_URI_TEST || 'mongodb://localhost:27017/finedge_test';
     
     if (mongoose.connection.readyState === 0) {
         await mongoose.connect(mongoUri);
