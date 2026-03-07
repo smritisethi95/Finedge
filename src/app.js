@@ -1,9 +1,8 @@
-
 const express = require('express');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-//const logger = require('./middleware/logger');
-//const errorHandler = require('./middleware/errorHandler');
+const { requestLogger } = require('./middleware/requestLogger');
+const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/userRoutes');
 
 dotenv.config();
@@ -16,17 +15,20 @@ mongoose.connect(process.env.MONGODB_URI)
 
 
 app.use(express.json());
-//app.use(logger);
+app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
 // app.use(validator);
 
 app.get('/health', (req, res) => {
-    res.send({ status: 'ok' });
+    res.status(200).json({
+        status: "OK",
+        message: "Server is running",
+        timeStamp: new Date().toISOString()
+    });
 });
 
 app.use('/users', userRoutes);
-//app.use(errorHandler); // add it after all the routes in the end only
+app.use(errorHandler);
 
-const PORT = process.env.PORT || '3000';
-app.listen(PORT, () => {
-    console.log(`server listening on ${PORT}`)
-})
+
+module.exports = app;
