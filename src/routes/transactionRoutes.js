@@ -2,19 +2,23 @@ const express = require('express');
 const router = express.Router();
 
 const transactionController = require('./../controllers/transactionController');
+const { validateRequest } = require('../middleware/validateRequest');
+const { validateJWT } = require('../middleware/authMiddleware');
+const { transactionCreateSchema, transactionUpdateSchema } = require('../schemas/transactionSchema');
 
-const {validateTransaction} = require('../middleware/validateTransaction');
-const requireUserId = require('../middleware/requireUserId');
 
-// apply header check for all routes in this router
-router.use(requireUserId);
+router.use(validateJWT);
 
-router.post('/', validateTransaction, transactionController.createTransaction);
+router.post('/', validateRequest(transactionCreateSchema), transactionController.createTransaction);
 router.get('/', transactionController.getTransactionsByUser);
+// AI/Automation endpoints - MUST come before /:transactionId
 router.get('/summary', transactionController.getSummary);
-router.get('/:transactionId', transactionController.getTransactionById);
-router.patch('/:transactionId', validateTransaction, transactionController.updateTransaction);
-router.delete('/:transactionId', transactionController.deleteTransaction);
+router.get('/recommendations', transactionController.getRecommendations);
+router.get('/recent', transactionController.getRecentTransactions);
 
+// Dynamic route MUST be last
+router.get('/:transactionId', transactionController.getTransactionById);
+router.patch('/:transactionId', validateRequest(transactionUpdateSchema), transactionController.updateTransaction);
+router.delete('/:transactionId', transactionController.deleteTransaction);
 
 module.exports = router;

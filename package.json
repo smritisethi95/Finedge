@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest"
+    "test": "jest --detectOpenHandles --forceExit",
+    "test:watch": "jest --watch"
   },
   "keywords": [
     "finance",
@@ -28,7 +29,8 @@
     "morgan": "^1.10.1"
   },
   "devDependencies": {
-    "jest": "^29.5.0",
-    "nodemon": "^2.0.22"
+    "jest": "^29.7.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^7.2.2"
   }
 }

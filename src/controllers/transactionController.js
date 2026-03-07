@@ -1,97 +1,129 @@
 const transactionService = require('../services/transactionService');
 const cacheService = require('../utils/cacheService');
+const analyticsService = require('../services/analyticsService');
+const { suggestCategory } = require('../utils/categorizer');
 
-//create a new transaction
-async function createTransaction(req, res) {
-    let userId = req.headers['x-user-id']; 
+function getUserIdFromReq(req) {
+    // ensure middleware validateJWT set req.userId
+    return req.userId || (req.user && (req.user.id || req.user.userId || req.user.sub)) || null;
+}
+
+async function createTransaction(req, res, next) {
+    console.log('Creating transaction with payload:', req.body);
     try {
-        let payload = {
-            ...req.body,
-            userId
-        }
+        const userId = getUserIdFromReq(req);
+        let { category, ...rest } = req.body;
+        
+        // Auto-suggest better category based on keywords
+        const suggestedCategory = suggestCategory(category);
+        
+        const payload = { ...rest, category: suggestedCategory, userId };
         const transaction = await transactionService.createTransaction(payload);
-        res.status(201).send(transaction);
+        const out = transaction && transaction.toObject ? transaction.toObject() : transaction;
+        
+        const message = suggestedCategory !== category 
+            ? `Transaction created. Category auto-corrected to '${suggestedCategory}'.`
+            : 'Transaction created successfully';
+            
+        return res.status(201).json({ success: true, data: out, message });
     } catch (error) {
-        // Handle Mongoose validation errors
-        if (error.name === 'ValidationError') {
-            const errors = Object.values(error.errors).map(err => err.message);
-            return res.status(400).json({ error: errors.join(', ') });
-        }
-        res.status(500).json({ error: error.message });
+        return next(error);
     }
 }
 
-//get all transactions for a user
-async function getTransactionsByUser(req, res) {
-    let userId = req.headers['x-user-id'];
+async function getTransactionsByUser(req, res, next) {
     try {
+        const userId = getUserIdFromReq(req);
         const transactions = await transactionService.getTransactionsByUser(userId);
-        res.status(200).json(transactions);
+        const out = transactions.map(t => (t.toObject ? t.toObject() : t));
+        return res.status(200).json({ success: true, data: out, message: 'Transactions retrieved successfully' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return next(error);
     }
 }
 
-//get transaction by id for a user
-async function getTransactionById(req, res) {
-    let userId = req.headers['x-user-id'];
+async function getTransactionById(req, res, next) {
     try {
+        const userId = getUserIdFromReq(req);
         const transaction = await transactionService.getTransactionById(userId, req.params.transactionId);
         if (!transaction) {
-            return res.status(404).json({ error: 'Transaction not found' });
+            const err = new Error('Transaction not found');
+            err.statusCode = 404;
+            throw err;
         }
-        res.status(200).json(transaction);
+        const out = transaction.toObject ? transaction.toObject() : transaction;
+        return res.status(200).json({ success: true, data: out, message: 'Transaction retrieved successfully' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return next(error);
     }
 }
 
-//update a transaction
-async function updateTransaction(req, res) {
-    let userId = req.headers['x-user-id'];
+async function updateTransaction(req, res, next) {
     try {
+        const userId = getUserIdFromReq(req);
         const transaction = await transactionService.updateTransaction(userId, req.params.transactionId, req.body);
         if (!transaction) {
-            return res.status(404).json({ error: 'Transaction not found' });
+            const err = new Error('Transaction not found');
+            err.statusCode = 404;
+            throw err;
         }
-        res.status(200).json(transaction);
+        const out = transaction.toObject ? transaction.toObject() : transaction;
+        return res.status(200).json({ success: true, data: out, message: 'Transaction updated successfully' });
     } catch (error) {
-        // Handle Mongoose validation errors
-        if (error.name === 'ValidationError') {
-            const errors = Object.values(error.errors).map(err => err.message);
-            return res.status(400).json({ error: errors.join(', ') });
-        }
-        res.status(500).json({ error: error.message });
+        return next(error);
     }
 }
 
-//delete a transaction
-async function deleteTransaction(req, res) {
-    let userId = req.headers['x-user-id'];
+async function deleteTransaction(req, res, next) {
     try {
+        const userId = getUserIdFromReq(req);
         const result = await transactionService.deleteTransaction(userId, req.params.transactionId);
         if (!result) {
-            return res.status(404).json({ error: 'Transaction not found' });
+            const err = new Error('Transaction not found');
+            err.statusCode = 404;
+            throw err;
         }
-        res.status(204).send();
+        return res.status(204).json({ success: true, message: 'Transaction deleted successfully' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return next(error);
     }
 }
 
-async function getSummary(req, res) {
-    let userId = req.headers['x-user-id'];
-    const cacheKey = `summary_${userId}`;
-    const cached = cacheService.get(cacheKey);
-    if (cached) {
-        return res.status(200).json(cached);
-    }
+async function getSummary(req, res, next) {
     try {
+        const userId = getUserIdFromReq(req);
+        const cacheKey = `summary_${userId}`;
+        const cached = cacheService.get(cacheKey);
+        if (cached) {
+            return res.status(200).json({ success: true, data: cached });
+        }
         const summary = await transactionService.getSummaryByUser(userId);
-        cacheService.set(cacheKey, summary, 60 * 1000); // cache for 60 seconds
-        res.status(200).json(summary);
+        cacheService.set(cacheKey, summary, 60 * 1000); // cache 60s
+        return res.status(200).json({ success: true, data: summary, message: 'Transaction summary retrieved successfully' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return next(error);
+    }
+}
+
+async function getRecommendations(req, res, next) {
+    try {
+        const userId = getUserIdFromReq(req);
+        const recommendations = await analyticsService.getSpendingRecommendations(userId);
+        return res.status(200).json({ success: true, data: recommendations });
+    } catch (error) {
+        return next(error);
+    }
+}
+
+async function getRecentTransactions(req, res, next) {
+    try {
+        const userId = getUserIdFromReq(req);
+        const since = req.query.since; // ISO timestamp
+        const transactions = await transactionService.getRecentTransactions(userId, since);
+        const out = transactions.map(t => (t.toObject ? t.toObject() : t));
+        return res.status(200).json({ success: true, data: out });
+    } catch (error) {
+        return next(error);
     }
 }
 
@@ -101,5 +133,7 @@ module.exports = {
     getTransactionById,
     updateTransaction,
     deleteTransaction,
-    getSummary
+    getSummary,
+    getRecommendations,
+    getRecentTransactions
 };

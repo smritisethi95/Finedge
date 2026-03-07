@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || "566HR+YfhfJ54H4R687486";
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+
 
 /**
  * Generate JWT token for a user
@@ -11,6 +12,7 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const generateToken = (payload) => {
     const { _id, email, name } = payload;
     
+    console.log(payload)
     return jwt.sign(
         { 
             id: _id, 
