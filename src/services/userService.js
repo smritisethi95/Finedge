@@ -1,4 +1,5 @@
 const User = require('../models/userModel');
+const { generateToken } = require('../utils/jwtHelper');
 
 class UserService {
     async registerUser(userData) {
@@ -16,7 +17,9 @@ class UserService {
         const userObject = user.toObject();
         delete userObject.password;
 
-        return userObject;
+        const token = generateToken(user);
+
+        return { user: userObject, token };
     }
 
     async loginUser(email, password) {
@@ -37,7 +40,9 @@ class UserService {
         const userObject = user.toObject();
         delete userObject.password;
 
-        return userObject;
+        const token = generateToken(user);
+
+        return { user: userObject, token };
     }
 
     async getUserById(userId) {
