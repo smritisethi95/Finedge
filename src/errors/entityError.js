@@ -4,7 +4,16 @@ class EntityNotFoundError extends BaseError {
     constructor(resource = 'Resource') {
         super(`${resource} not found`, 404);
     }
+};
+
+class EntityAlreadyExistError extends BaseError {
+    constructor(resource = 'Resource') {
+        super(`${resource} already exists`, 400);
+    }
 }
 
 
-module.exports = EntityNotFoundError;
+module.exports = {
+    EntityNotFoundError,
+    EntityAlreadyExistError
+};

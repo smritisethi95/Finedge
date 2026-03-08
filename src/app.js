@@ -1,17 +1,17 @@
-const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
+
+const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimiter = require('./middleware/rateLimiter');
-//const logger = require('./middleware/logger');
-//const errorHandler = require('./middleware/errorHandler');
 const { requestLogger } = require('./middleware/requestLogger');
 const errorHandler = require('./middleware/errorHandler');
 const userRoutes = require('./routes/userRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
+const budgetRoutes = require('./routes/budgetRoutes');
 
-dotenv.config();
 const app = express();
 
 
@@ -53,7 +53,7 @@ app.use((req, res, next) => {
 
 app.use('/users', userRoutes);
 app.use('/api/v1/transactions', transactionRoutes);
-//app.use(errorHandler); // add it after all the routes in the end only
+app.use('/api/v1/budgets', budgetRoutes);
 app.use(errorHandler);
 
 
