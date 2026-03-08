@@ -40,8 +40,7 @@ class UserService {
         const userObject = user.toObject();
         delete userObject.password;
 
-        const token = generateToken(user);
-
+        const token = generateToken(user)
         return { user: userObject, token };
     }
 

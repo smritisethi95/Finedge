@@ -19,6 +19,7 @@ const validateJWT = (req, res, next) => {
 
         // Attach user data to request
         req.user = decodedToken;
+        req.userId = (decodedToken.id || decodedToken.userId || decodedToken.sub || '').toString();
 
         next();
 
