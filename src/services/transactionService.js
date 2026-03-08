@@ -1,4 +1,5 @@
 const Transaction = require('../models/transactionModel');
+const Budget = require('../models/budgetModel');
 const { toObjectId } = require('../utils/mongoHelper');
 
 // Create a new transaction
@@ -33,26 +34,71 @@ async function deleteTransaction(userId, transactionId) {
 }
 
 async function getSummaryByUser(userId) {
-    const summary = await Transaction.aggregate([
-        { $match: { userId: toObjectId(userId) } },
-        {
-            $group: {
-                _id: "$type",
-                total: { $sum: "$amount" }
-            }
+  const now = new Date();
+
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  const summary = await Transaction.aggregate([
+    {
+      $match: {
+        userId: toObjectId(userId),
+        date: {
+          $gte: startOfMonth,
+          $lt: endOfMonth
         }
-    ]);
-    
-    // Format result to match test expectations
-    const result = { totalIncome: 0, totalExpense: 0 };
-    summary.forEach(item => {
-        if (item._id === 'income') {
-            result.totalIncome = item.total;
-        } else if (item._id === 'expense') {
-            result.totalExpense = item.total;
-        }
-    });
-    return result;
+      }
+    },
+    {
+      $group: {
+        _id: "$type",
+        total: { $sum: "$amount" }
+      }
+    }
+  ]);
+
+  const result = {
+    totalIncome: 0,
+    totalExpense: 0
+  };
+
+  summary.forEach((item) => {
+    if (item._id === "income") {
+      result.totalIncome = item.total;
+    }
+
+    if (item._id === "expense") {
+      result.totalExpense = item.total;
+    }
+  });
+
+  const balance = result.totalIncome - result.totalExpense;
+
+  const budget = await Budget.findOne({ userId });
+
+  let monthlyGoal = 0;
+  let savingsTarget = 0;
+  let remainingBudget = 0;
+
+  if (budget) {
+    monthlyGoal = budget.monthlyGoal;
+    savingsTarget = budget.savingsTarget;
+    remainingBudget = monthlyGoal - result.totalExpense;
+  }
+
+  const budgetStatus =
+    remainingBudget < 0 ? "OVER_BUDGET" : "WITHIN_BUDGET";
+
+  return {
+    month: now.toLocaleString("default", { month: "long" }),
+    totalIncome: result.totalIncome,
+    totalExpense: result.totalExpense,
+    balance,
+    monthlyGoal,
+    savingsTarget,
+    remainingBudget,
+    budgetStatus
+  };
 }
 
 async function getRecentTransactions(userId, sinceTimestamp) {
