@@ -1,13 +1,5 @@
 const Transaction = require('../models/transactionModel');
-const mongoose = require('mongoose');
-
-// Helper to convert userId to ObjectId if needed
-function toObjectId(userId) {
-    if (typeof userId === 'string') {
-        return new mongoose.Types.ObjectId(userId);
-    }
-    return userId;
-}
+const { toObjectId } = require('../utils/mongoHelper');
 
 // Create a new transaction
 async function createTransaction(transactionData) {

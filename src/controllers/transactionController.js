@@ -2,11 +2,7 @@ const transactionService = require('../services/transactionService');
 const cacheService = require('../utils/cacheService');
 const analyticsService = require('../services/analyticsService');
 const { suggestCategory } = require('../utils/categorizer');
-
-function getUserIdFromReq(req) {
-    // ensure middleware validateJWT set req.userId
-    return req.userId || (req.user && (req.user.id || req.user.userId || req.user.sub)) || null;
-}
+const { getUserIdFromReq } = require('../utils/requestHelper');
 
 async function createTransaction(req, res, next) {
     console.log('Creating transaction with payload:', req.body);
