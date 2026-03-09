@@ -79,45 +79,54 @@ Finedge/
 ├── src/
 │   ├── controllers/         # Request handlers
 │   │   ├── userController.js
-│   │   └── transactionController.js
-│   ├── models/             # Mongoose schemas
-│   │   ├── userModel.js
-│   │   └── transactionModel.js
-│   ├── routes/             # API routes
-│   │   ├── userRoutes.js
-│   │   └── transactionRoutes.js
-│   ├── services/           # Business logic
-│   │   ├── userService.js
-│   │   ├── transactionService.js
-│   │   └── analyticsService.js
-│   ├── middleware/         # Custom middleware
-│   │   ├── authMiddleware.js
-│   │   ├── errorHandler.js
-│   │   ├── requestLogger.js
-│   │   ├── validateRequest.js
-│   │   └── rateLimiter.js
-│   ├── schemas/            # Joi validation schemas
-│   │   ├── userSchema.js
-│   │   └── transactionSchema.js
-│   ├── utils/              # Utility functions
-│   │   ├── jwtHelper.js
-│   │   ├── cacheService.js
-│   │   └── categorizer.js
-│   ├── errors/             # Custom error classes
+│   │   ├── transactionController.js
+│   │   └── budgetController.js
+│   ├── data/                # In-memory or seed data
+│   ├── errors/              # Custom error classes
 │   │   ├── authError.js
 │   │   ├── baseError.js
 │   │   ├── entityError.js
 │   │   └── requestError.js
-│   ├── tests/              # Test suites
+│   ├── middleware/          # Custom middleware
+│   │   ├── authMiddleware.js
+│   │   ├── errorHandler.js
+│   │   ├── rateLimiter.js
+│   │   ├── requestLogger.js
+│   │   └── validateRequest.js
+│   ├── models/              # Data models
+│   │   ├── userModel.js
+│   │   ├── transactionModel.js
+│   │   └── budgetModel.js
+│   ├── routes/              # API routes
+│   │   ├── userRoutes.js
+│   │   ├── transactionRoutes.js
+│   │   └── budgetRoutes.js
+│   ├── schemas/             # Joi validation schemas
+│   │   ├── userSchema.js
+│   │   ├── transactionSchema.js
+│   │   └── budgetsSchema.js
+│   ├── services/            # Business logic layer
+│   │   ├── userService.js
+│   │   ├── transactionService.js
+│   │   ├── budgetService.js
+│   │   └── analyticsService.js
+│   ├── tests/               # Test suites
 │   │   ├── user.test.js
 │   │   ├── transaction.test.js
-│   │   └── summary.test.js
-│   ├── app.js              # Express app configuration
-│   └── server.js           # Server entry point
-├── .env.example            # Environment variables template
+│   │   └── summary.test.js          
+│   ├── utils/               # Helper utilities
+│   │   ├── analytics.js
+│   │   ├── cacheService.js
+│   │   ├── categorizer.js
+│   │   ├── jwtHelper.js
+│   │   ├── mongoHelper.js
+│   │   └── requestHelper.js
+│   ├── app.js               # Express app configuration
+│   └── server.js            # Application entry point
+├── .env.example
 ├── .gitignore
-├── jest.config.js          # Jest configuration
 ├── package.json
+├── jest.config.js
 └── README.md
 ```
 
