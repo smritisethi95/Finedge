@@ -25,6 +25,7 @@ A comprehensive **Personal Finance Management Application** built with Node.js, 
 ### Core Features
 - **User Authentication**: Secure JWT-based user registration and login
 - **Transaction Management**: Track income and expenses with categories
+- **Budget Management**: Set monthly budget for categories and track spending against limits
 - **Financial Summary**: View total income, expenses, and balance
 
 ### Advanced Features
@@ -478,9 +479,97 @@ Authorization: Bearer <token>
 
 ---
 
+### Budget Endpoints
+
+#### 11. Create Budget
+```http
+POST /api/v1/budgets
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "monthlyGoal": 6000,
+  "savingsTarget": 3000
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+    "userId": "69ad5a5c3ee27e863a0b1348",
+    "monthlyGoal": 6000,
+    "savingsTarget": 3000,
+    "_id": "69af1b1e2713966db317dfc8",
+    "__v": 0
+}
+```
+
+---
+
+#### 12. Retrieve All Budgets
+```http
+GET /api/v1/budgets
+Authorization: Bearer <token>
+```
+
+**Response:** `200 OK`
+```json
+[
+    {
+        "_id": "69ad5eac567d6ad784f08d3f",
+        "userId": "69ad5a5c3ee27e863a0b1348",
+        "monthlyGoal": 6000,
+        "savingsTarget": 3000,
+        "__v": 0
+    }
+]
+```
+
+---
+
+#### 13. Update Budget
+```http
+PATCH /api/v1/budgets/:budgetId
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+    "monthlyGoal": 8000,
+    "savingsTarget": 7500
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+    "_id": "69ad5eac567d6ad784f08d3f",
+    "userId": "69ad5a5c3ee27e863a0b1348",
+    "monthlyGoal": 8000,
+    "savingsTarget": 7500,
+    "__v": 0
+}
+```
+
+---
+
+#### 14. Delete Budget
+```http
+DELETE /api/v1/budgets/:budgetId
+Authorization: Bearer <token>
+```
+
+**Response:** `200 OK`
+```json
+{
+    "message": "Budget deleted successfully"
+}
+```
+
+---
+
 ### 📊 Analytics Endpoints
 
-#### 11. Get Financial Summary
+#### 15. Get Financial Summary
 ```http
 GET /api/v1/transactions/summary
 Authorization: Bearer <token>
@@ -492,8 +581,14 @@ Authorization: Bearer <token>
   "success": true,
   "message": "Transaction summary retrieved successfully",
   "data": {
-    "totalIncome": 5000,
-    "totalExpense": 1250.75
+    "month": "March",
+      "totalIncome": 6000,
+      "totalExpense": 7000,
+      "balance": -1000,
+      "monthlyGoal": 6000,
+      "savingsTarget": 3000,
+      "remainingBudget": -1000,
+      "budgetStatus": "OVER_BUDGET"
   }
 }
 ```
@@ -502,7 +597,7 @@ Authorization: Bearer <token>
 
 ---
 
-#### 12. Get Spending Recommendations
+#### 16. Get Spending Recommendations
 ```http
 GET /api/v1/transactions/recommendations
 Authorization: Bearer <token>
@@ -529,7 +624,7 @@ Authorization: Bearer <token>
 
 ---
 
-#### 13. Get Recent Transactions
+#### 17. Get Recent Transactions
 ```http
 GET /api/v1/transactions/recent?since=2026-03-01T00:00:00.000Z
 Authorization: Bearer <token>
@@ -693,8 +788,10 @@ ISC
 
 ## 👥 Contributors
 
-- Your Name
-- Team Members (if applicable)
+- Anusha Hublikar
+- Smriti Sethi
+- Maitri Joshi
+- Nadeem Ahemad Theba
 
 ---
 
